@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+  <head>
+<link rel="stylesheet" type="text/css" href="stylesheets/style.css" />
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+<script type="text/javascript">
+  var grid;
+  function checkWinner() {
+    //horizontals
+    if (grid[0] === 'X' && grid[1] === 'X' && grid[2] === 'X') {
+      return 'X';
+    }
+    if (grid[3] === 'X' && grid[4] === 'X' && grid[5] === 'X') {
+      return 'X';
+    }
+    if (grid[6] === 'X' && grid[7] === 'X' && grid[8] === 'X') {
+      return 'X';
+    }
+    //verticals
+    if (grid[0] === 'X' && grid[3] === 'X' && grid[6] === 'X') {
+      return 'X';
+    }
+    if (grid[1] === 'X' && grid[4] === 'X' && grid[7] === 'X') {
+      return 'X';
+    }
+    if (grid[2] === 'X' && grid[5] === 'X' && grid[8] === 'X') {
+      return 'X';
+    }
+    //diags
+    if (grid[0] === 'X' && grid[4] === 'X' && grid[8] === 'X') {
+      return 'X';
+    }    
+    if (grid[2] === 'X' && grid[4] === 'X' && grid[6] === 'X') {
+      return 'X';
+    }
+    //draw
+    if (grid[0] != null && grid[1] != null && grid[2] != null && grid[3] != null && grid[4] != null && grid[5] != null && grid[6] != null && grid[7] != null && grid[8] != null) {
+      return false;
+    }
+    return null;
+  }
+  function updateGrid(gid) {
+    if (!isNaN(gid)) {
+      if (gid > 0 || gid < 8) {
+        grid[gid] = 'X';
+        return grid;
+      }
+    } // else
+    // findLowestNumber
+    for (var i = 0; i < grid.length; i++) {
+      if (grid[i] === null) {
+        grid[i] = 'X';
+        return grid;
+      }
+    }
+  }
+  $(document).ready(function() {
+    $("div#hellostring").hide();
+    $("div#grid").hide();
+    $("div#boardstate").hide();
+    $("form#nameform").submit(function(event) {
+      event.preventDefault();
+      var $form = $(this),
+      term = $form.find("input[name='name']").val(),
+      url = $form.attr("action");
+      $.ajax({
+        url: url, 
+        data: JSON.stringify({name: term}),
+        type: 'POST',
+        contentType: 'application/json',
+        success: function(data) {
+          $("div#formshow").hide();
+          $("div#hellostring").show();
+          $("div#grid").show();
+          $("div#boardstate").show();
+          $("div#hellostring").text("Hello, " + data.name + ", " + data.date);
+          grid = [null,null,null,null,null,null,null,null,null];
+        }
+      });
+    });
+    $("form#gridform").submit(function(event) {
+      event.preventDefault();
+      var $form = $(this),
+      term = $form.find("input[name='gid']").val(),
+      url = $form.attr("action");
+
+      updateGrid(term);
+      var win = checkWinner();
+      if (win === 'X') {
+        alert("you win. yay");
+      }
+      $.ajax({
+        url: url,
+        data: JSON.stringify({grid: grid, winner: win}),
+        type: 'POST',
+        contentType: 'application/json',
+        success: function(data) {
+          // CHECK IF SERVER WIN = YES, ALERT SCREEN
+                // ******
+          // todo !!! ^^ 
+          grid = data.grid;
+          $("div#boardstate").text("Current board is: " + grid);
+        },
+        error: function(req, err) {
+          console.log("error" + err);
+        }
+      });
+    });
+  });
+</script>
+	</head>
+</head>
+<body>
+
+  <div id= "formshow">
+    <form id="nameform" action="/ttt" method="post">
+      Name: <input type="text" name="name" placeholder="Your name..."><br>
+      <input type="submit" name="submit" value="Submit">
+    </form>
+  </div>
+
+  <div id= "hellostring">
+    content to be updated
+  </div>
+
+  <div id= "grid">
+      <form id="gridform" action="/ttt/play" method="post">
+        Enter grid index [0,8]: <input type="text" name="gid" placeholder="if value is not [0,8], lowest available space will be selected"><br>
+        <input type="submit" name="submit" value="Submit">
+      </form>
+  </div>
+
+  <div id= "boardstate">
+    grid will replace this
+  </div>
+
+  </body>
+</html>

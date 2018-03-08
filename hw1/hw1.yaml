@@ -1,0 +1,17 @@
+---
+- hosts: hw1
+  remote_user: root
+  become: yes
+  tasks:
+  - name: install nginx
+    apt: name=nginx state=latest update-cache=yes
+  - name: install git
+    apt: name=git state=latest
+  - name: create new directory
+    file: path=tmp/hw1 state=directory
+  - name: pull from git repo
+    git: dest=tmp/hw1 clone=yes repo="https://github.com/calvinli3/cloudcomputing-hws.git"
+  - name: move html to html directory
+    command: mv /tmp/hw1/hw0.html var/www/html
+  - name: move png html directory
+    command: mv /tmp/hw1/poggers.png var/www/html
